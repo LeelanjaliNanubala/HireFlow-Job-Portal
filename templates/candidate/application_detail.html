@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load hf_extras %}
+{% block title %}Application details{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <a class="small text-decoration-none" href="{% url 'applications:mine' %}">&larr; All applications</a>
+  <div class="hf-page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div><h1>{{ application.job.title }}</h1><div class="text-muted">{{ application.job.company.name }} &middot; applied {{ application.applied_at|date:"d M Y" }}</div></div>
+    <span class="badge fs-6 hf-badge {{ application.status|status_class }}">{{ application.get_status_display }}</span>
+  </div>
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="hf-card mb-4"><div class="hf-card-header">Status history</div><div class="hf-card-body">
+        <ul class="hf-timeline">
+          {% for item in history %}
+            <li><div class="fw-semibold">{% if item.old_status %}{{ item.old_status|status_label }} &rarr; {% endif %}{{ item.new_status|status_label }}</div>
+              <div class="hf-meta">{{ item.changed_at|date:"d M Y, H:i" }}</div>
+              {% if item.note %}<div class="small">{{ item.note }}</div>{% endif %}</li>
+          {% endfor %}
+        </ul>
+      </div></div>
+      {% if application.cover_letter %}
+      <div class="hf-card"><div class="hf-card-header">Your cover letter</div><div class="hf-card-body" style="white-space: pre-line">{{ application.cover_letter }}</div></div>
+      {% endif %}
+    </div>
+    <div class="col-lg-5">
+      <div class="hf-card mb-4"><div class="hf-card-header">Interviews</div>
+        <ul class="list-group list-group-flush">
+          {% for interview in interviews %}
+            <li class="list-group-item">
+              <div class="fw-semibold">Round {{ interview.round_number }} &middot; {{ interview.scheduled_at|date:"D, d M Y, H:i" }}
+                <span class="badge {{ interview.status|status_class }}">{{ interview.get_status_display }}</span></div>
+              <div class="hf-meta">{{ interview.get_mode_display }} &middot; {{ interview.duration_minutes }} min{% if interview.interviewer_name %} &middot; {{ interview.interviewer_name }}{% endif %}</div>
+              {% if interview.meeting_details %}<div class="small">{{ interview.meeting_details }}</div>{% endif %}
+            </li>
+          {% empty %}<li class="list-group-item hf-meta">No interviews yet.</li>{% endfor %}
+        </ul>
+      </div>
+      <div class="d-grid gap-2">
+        <a class="btn btn-outline-primary" href="{% url 'jobs:detail' application.job.pk %}">View job posting</a>
+        {% if can_withdraw %}
+          <form method="post" action="{% url 'applications:withdraw' application.pk %}" data-confirm="Withdraw this application? This cannot be undone.">{% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger w-100">Withdraw application</button></form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

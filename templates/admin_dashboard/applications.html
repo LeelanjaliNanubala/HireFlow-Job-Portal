@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load hf_extras %}
+{% block title %}Application monitoring{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="hf-page-header"><h1>Applications</h1></div>
+  {% include "admin_dashboard/_nav.html" %}
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-md-5"><input class="form-control" name="q" value="{{ q }}" placeholder="Search job or candidate"></div>
+    <div class="col-md-3"><select class="form-select" name="status"><option value="">All statuses</option>
+      {% for value, label in statuses %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-2 d-grid"><button class="btn btn-primary" type="submit" data-no-loading>Filter</button></div>
+  </form>
+  <div class="hf-card"><div class="table-responsive">
+    <table class="table hf-table table-hover">
+      <thead><tr><th>Candidate</th><th>Job</th><th>Company</th><th>Applied</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for app in page_obj %}
+        <tr><td class="fw-semibold">{{ app.candidate.user.full_name }}<div class="hf-meta">{{ app.candidate.user.email }}</div></td>
+          <td>{{ app.job.title }}</td><td>{{ app.job.company.name }}</td><td>{{ app.applied_at|date:"d M Y" }}</td>
+          <td><span class="badge hf-badge {{ app.status|status_class }}">{{ app.get_status_display }}</span></td></tr>
+      {% empty %}<tr><td colspan="5">{% include "partials/empty_state.html" with icon="send" title="No applications found" %}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+  {% include "partials/pagination.html" %}
+</div>
+{% endblock %}

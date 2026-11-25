@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Manage users{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="hf-page-header"><h1>Users</h1></div>
+  {% include "admin_dashboard/_nav.html" %}
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-md-5"><input class="form-control" name="q" value="{{ q }}" placeholder="Search name or email"></div>
+    <div class="col-md-3"><select class="form-select" name="role"><option value="">All roles</option>
+      {% for value, label in roles %}<option value="{{ value }}" {% if role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-2 d-grid"><button class="btn btn-primary" type="submit" data-no-loading>Filter</button></div>
+  </form>
+  <div class="hf-card"><div class="table-responsive">
+    <table class="table hf-table table-hover">
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      {% for u in page_obj %}
+        <tr><td class="fw-semibold">{{ u.full_name }}</td><td>{{ u.email }}</td><td>{{ u.get_role_display }}</td><td>{{ u.created_at|date:"d M Y" }}</td>
+          <td>{% if u.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Deactivated</span>{% endif %}</td>
+          <td class="text-end">{% if u.pk != user.pk %}
+            <form method="post" action="{% url 'analytics:admin_user_toggle' u.pk %}" data-confirm="{% if u.is_active %}Deactivate{% else %}Activate{% endif %} {{ u.email }}?">{% csrf_token %}
+              <button class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}" type="submit" data-no-loading>{% if u.is_active %}Deactivate{% else %}Activate{% endif %}</button></form>{% endif %}</td></tr>
+      {% empty %}<tr><td colspan="6">{% include "partials/empty_state.html" with icon="people" title="No users found" %}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+  {% include "partials/pagination.html" %}
+</div>
+{% endblock %}

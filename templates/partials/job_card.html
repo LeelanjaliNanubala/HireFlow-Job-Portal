@@ -1,0 +1,24 @@
+<div class="hf-card hf-job-card"><div class="hf-card-body d-flex flex-column h-100">
+  <div class="d-flex gap-3 mb-2">
+    <div class="hf-avatar">{{ job.company.name|first|upper }}</div>
+    <div>
+      <h3 class="h6 mb-0"><a class="text-decoration-none text-reset stretched-link" href="{% url 'jobs:detail' job.pk %}">{{ job.title }}</a></h3>
+      <div class="hf-meta d-flex align-items-center gap-2 flex-wrap">
+        <span>{{ job.company.name }}</span>
+        {% if job.company.is_verified %}
+        <span class="badge bg-success">
+          <i class="bi bi-patch-check-fill"></i> Verified Company
+        </span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="hf-meta mb-2">
+    <i class="bi bi-geo-alt"></i> {{ job.location }} &middot; {{ job.get_employment_type_display }} &middot; {{ job.experience_display }}
+  </div>
+  <div class="mb-2">{% for js in job.job_skills.all|slice:":4" %}<span class="hf-chip">{{ js.skill.name }}</span>{% endfor %}</div>
+  <div class="mt-auto d-flex justify-content-between hf-meta">
+    <span><i class="bi bi-cash"></i> {{ job.salary_display }}</span>
+    <span><i class="bi bi-calendar-event"></i> {{ job.deadline|date:"d M Y" }}</span>
+  </div>
+</div></div>

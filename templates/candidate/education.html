@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Education{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="hf-page-header"><h1>Education</h1></div>
+  {% include "candidate/_nav.html" with tab="education" %}
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="hf-card">
+        {% for item in items %}
+          <div class="hf-card-body border-bottom d-flex justify-content-between">
+            <div><div class="fw-semibold">{{ item.degree }}{% if item.field_of_study %}, {{ item.field_of_study }}{% endif %}</div>
+              <div class="hf-meta">{{ item.institution }} &middot; {{ item.start_year }} - {{ item.end_year|default:"Present" }}{% if item.grade %} &middot; {{ item.grade }}{% endif %}</div></div>
+            <form method="post" action="{% url 'candidates:education_delete' item.pk %}" data-confirm="Remove this education entry?">{% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger" data-no-loading><i class="bi bi-trash"></i></button></form>
+          </div>
+        {% empty %}{% include "partials/empty_state.html" with icon="mortarboard" title="No education added" text="Add your degrees and courses." %}{% endfor %}
+      </div>
+    </div>
+    <div class="col-lg-5"><div class="hf-card"><div class="hf-card-header">Add education</div><div class="hf-card-body">
+      <form method="post" novalidate>{% csrf_token %}{% include "partials/form_fields.html" %}<button class="btn btn-primary" type="submit">Add</button></form>
+    </div></div></div>
+  </div>
+</div>
+{% endblock %}

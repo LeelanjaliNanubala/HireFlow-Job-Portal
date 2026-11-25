@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Skills{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="hf-page-header"><h1>Skills</h1></div>
+  {% include "candidate/_nav.html" with tab="skills" %}
+  <div class="row g-4">
+    <div class="col-lg-7"><div class="hf-card"><div class="hf-card-body">
+      {% for item in items %}
+        <form method="post" action="{% url 'candidates:skill_remove' item.pk %}" class="d-inline">{% csrf_token %}
+          <span class="hf-chip">{{ item.skill.name }} &middot; {{ item.get_proficiency_display }}
+            <button type="submit" class="btn btn-link btn-sm p-0 ms-1 text-danger" data-no-loading aria-label="Remove {{ item.skill.name }}"><i class="bi bi-x-circle"></i></button></span>
+        </form>
+      {% empty %}{% include "partials/empty_state.html" with icon="stars" title="No skills yet" text="Add the skills recruiters search for." %}{% endfor %}
+    </div></div></div>
+    <div class="col-lg-5"><div class="hf-card"><div class="hf-card-header">Add a skill</div><div class="hf-card-body">
+      <form method="post" novalidate>{% csrf_token %}{% include "partials/form_fields.html" %}<button class="btn btn-primary" type="submit">Save skill</button></form>
+    </div></div></div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load hf_extras %}
+{% block title %}{{ job.title }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  {% if is_preview %}
+    <div class="alert alert-warning">Preview: this job is <strong>{{ job.get_status_display }}</strong>{% if job.is_hidden_by_admin %} and hidden by an administrator{% endif %}. Candidates cannot see it.</div>
+  {% endif %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="hf-card"><div class="hf-card-body">
+        <div class="d-flex gap-3 mb-3">
+          <div class="hf-avatar">{{ job.company.name|first|upper }}</div>
+          <div>
+            <h1 class="h3 mb-1">{{ job.title }}</h1>
+            <a class="text-decoration-none" href="{% url 'companies:detail' job.company.pk %}">{{ job.company.name }}</a>
+            {% if job.company.is_verified %}<i class="bi bi-patch-check-fill text-primary" title="Verified company"></i>{% endif %}
+          </div>
+        </div>
+        <div class="mb-3">{% for js in job.job_skills.all %}<span class="hf-chip">{{ js.skill.name }}</span>{% endfor %}</div>
+        <h2 class="h6">About the role</h2>
+        <p style="white-space: pre-line">{{ job.description }}</p>
+        {% if job.responsibilities %}<h2 class="h6">Responsibilities</h2><p style="white-space: pre-line">{{ job.responsibilities }}</p>{% endif %}
+      </div></div>
+    </div>
+    <div class="col-lg-4">
+      <div class="hf-card mb-3"><div class="hf-card-body">
+        <ul class="list-unstyled mb-3 small">
+          <li class="mb-2"><i class="bi bi-geo-alt"></i> {{ job.location }}</li>
+          <li class="mb-2"><i class="bi bi-briefcase"></i> {{ job.get_employment_type_display }}</li>
+          <li class="mb-2"><i class="bi bi-bar-chart"></i> Experience: {{ job.experience_display }}</li>
+          <li class="mb-2"><i class="bi bi-cash"></i> {{ job.salary_display }}</li>
+          <li><i class="bi bi-calendar-event"></i> Apply before {{ job.deadline|date:"d M Y" }}</li>
+        </ul>
+
+        {% if can_apply %}
+          {% if already_applied %}
+            <div class="alert alert-success small">You applied on {{ already_applied.applied_at|date:"d M Y" }}.
+              Status: <span class="badge {{ already_applied.status|status_class }}">{{ already_applied.get_status_display }}</span></div>
+            <a class="btn btn-outline-primary w-100" href="{% url 'applications:detail' already_applied.pk %}">View application</a>
+          {% elif resume_count == 0 %}
+            <p class="small text-muted">Upload a resume before you apply.</p>
+            <a class="btn btn-primary w-100" href="{% url 'candidates:resumes' %}">Upload resume</a>
+          {% else %}
+            <form method="post" action="{% url 'applications:apply' job.pk %}" data-confirm="Submit your application for this job?">
+              {% csrf_token %}
+              {% include "partials/form_fields.html" with form=apply_form %}
+              <button type="submit" class="btn btn-primary w-100" data-loading-text="Submitting...">Apply now</button>
+            </form>
+          {% endif %}
+          <form method="post" action="{% url 'candidates:toggle_saved' job.pk %}" class="mt-2">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ job.get_absolute_url }}">
+            <button type="submit" class="btn btn-outline-secondary w-100" data-no-loading>
+              <i class="bi bi-bookmark{% if is_saved %}-fill{% endif %}"></i> {% if is_saved %}Saved{% else %}Save job{% endif %}
+            </button>
+          </form>
+        {% elif not user.is_authenticated %}
+          <a class="btn btn-primary w-100 mb-2" href="{% url 'accounts:login' %}?next={{ request.path }}">Log in to apply</a>
+          <a class="btn btn-outline-primary w-100" href="{% url 'accounts:register_candidate' %}">Create a free account</a>
+        {% elif user.role != 'candidate' %}
+          <p class="small text-muted mb-0">Only candidate accounts can apply for jobs.</p>
+        {% endif %}
+      </div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

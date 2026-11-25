@@ -1,0 +1,30 @@
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+
+# Database
+db.sqlite3
+
+# Django generated files
+staticfiles/
+media/
+
+# IDE
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Private candidate resumes
+media_private/resumes/**
+!media_private/resumes/.gitkeep

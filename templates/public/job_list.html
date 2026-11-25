@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Find jobs{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="hf-page-header"><h1>Find jobs</h1><p class="text-muted mb-0">{{ total }} job{{ total|pluralize }} found</p></div>
+  <div class="row g-4">
+    <div class="col-lg-3">
+      <form method="get" class="hf-card hf-card-body">
+        <div class="mb-3"><label class="form-label" for="q">Keyword</label>
+          <input class="form-control" id="q" name="q" value="{{ params.q }}" placeholder="Title, skill, company"></div>
+        <div class="mb-3"><label class="form-label" for="location">Location</label>
+          <input class="form-control" id="location" name="location" value="{{ params.location }}"></div>
+        <div class="mb-3"><label class="form-label" for="employment_type">Employment type</label>
+          <select class="form-select" id="employment_type" name="employment_type">
+            <option value="">Any</option>
+            {% for value, label in employment_types %}<option value="{{ value }}" {% if params.employment_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select></div>
+        <div class="mb-3"><label class="form-label" for="experience">Your experience (years)</label>
+          <input class="form-control" type="number" min="0" max="50" id="experience" name="experience" value="{{ params.experience }}"></div>
+        <div class="mb-3"><label class="form-label" for="sort">Sort by</label>
+          <select class="form-select" id="sort" name="sort">
+            <option value="newest" {% if params.sort == 'newest' %}selected{% endif %}>Newest</option>
+            <option value="deadline" {% if params.sort == 'deadline' %}selected{% endif %}>Closing soon</option>
+            <option value="salary" {% if params.sort == 'salary' %}selected{% endif %}>Highest salary</option>
+            <option value="title" {% if params.sort == 'title' %}selected{% endif %}>Title A-Z</option>
+          </select></div>
+        <div class="d-grid gap-2">
+          <button class="btn btn-primary" type="submit">Apply filters</button>
+          <a class="btn btn-outline-secondary" href="{% url 'jobs:list' %}">Clear</a>
+        </div>
+      </form>
+    </div>
+    <div class="col-lg-9">
+      <div class="row g-3">
+        {% for job in page_obj %}
+          <div class="col-md-6">{% include "partials/job_card.html" %}</div>
+        {% empty %}
+          <div class="col-12 hf-card">{% include "partials/empty_state.html" with icon="search" title="No jobs match your search" text="Try fewer filters or a different keyword." %}</div>
+        {% endfor %}
+      </div>
+      {% include "partials/pagination.html" %}
+    </div>
+  </div>
+</div>
+{% endblock %}

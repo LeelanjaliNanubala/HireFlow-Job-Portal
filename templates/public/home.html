@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Find your next job{% endblock %}
+{% block content %}
+<section class="hf-hero">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <h1 class="mb-3">Find the job that fits your skills.<br>Hire the people who fit your team.</h1>
+        <p class="lead mb-4">HireFlow connects candidates and recruiters in one simple platform.</p>
+        <form class="hf-search row g-2 align-items-center" method="get" action="{% url 'jobs:list' %}">
+          <div class="col-md-5"><input class="form-control" type="text" name="q" placeholder="Job title, skill or company" aria-label="Keyword"></div>
+          <div class="col-md-4"><input class="form-control" type="text" name="location" placeholder="City or location" aria-label="Location"></div>
+          <div class="col-md-3 d-grid"><button class="btn btn-primary" type="submit" data-no-loading><i class="bi bi-search"></i> Search jobs</button></div>
+        </form>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <span class="hf-stat-pill"><i class="bi bi-briefcase"></i> {{ stats.jobs }} open jobs</span>
+          <span class="hf-stat-pill"><i class="bi bi-building"></i> {{ stats.companies }} verified companies</span>
+          <span class="hf-stat-pill"><i class="bi bi-people"></i> {{ stats.candidates }} candidates</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container py-5">
+  {% if featured %}
+  <div class="d-flex justify-content-between align-items-end mb-3"><h2 class="h4 mb-0">Featured jobs</h2><a href="{% url 'jobs:list' %}">View all</a></div>
+  <div class="row g-3 mb-5">
+    {% for job in featured %}<div class="col-md-6 col-lg-4">{% include "partials/job_card.html" %}</div>{% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="d-flex justify-content-between align-items-end mb-3"><h2 class="h4 mb-0">Latest jobs</h2><a href="{% url 'jobs:list' %}">Browse all jobs</a></div>
+  <div class="row g-3">
+    {% for job in latest %}
+      <div class="col-md-6 col-lg-4">{% include "partials/job_card.html" %}</div>
+    {% empty %}
+      <div class="col-12">{% include "partials/empty_state.html" with icon="briefcase" title="No open jobs yet" text="Check back soon, or log in as a recruiter to post the first one." %}</div>
+    {% endfor %}
+  </div>
+
+  {% if top_locations %}
+  <h2 class="h4 mt-5 mb-3">Popular locations</h2>
+  <div>{% for item in top_locations %}<a class="btn btn-outline-primary btn-sm me-2 mb-2" href="{% url 'jobs:list' %}?location={{ item.location|urlencode }}">{{ item.location }} ({{ item.total }})</a>{% endfor %}</div>
+  {% endif %}
+
+  <div class="row g-3 mt-4">
+    <div class="col-md-4"><div class="hf-card hf-card-body"><div class="hf-avatar mb-2"><i class="bi bi-person-plus"></i></div><h3 class="h6">1. Create your profile</h3><p class="hf-meta mb-0">Add your skills, experience and upload your resume.</p></div></div>
+    <div class="col-md-4"><div class="hf-card hf-card-body"><div class="hf-avatar mb-2"><i class="bi bi-search"></i></div><h3 class="h6">2. Search and apply</h3><p class="hf-meta mb-0">Filter jobs by location, type and experience, then apply in one click.</p></div></div>
+    <div class="col-md-4"><div class="hf-card hf-card-body"><div class="hf-avatar mb-2"><i class="bi bi-graph-up-arrow"></i></div><h3 class="h6">3. Track your progress</h3><p class="hf-meta mb-0">See every status change and interview detail in your dashboard.</p></div></div>
+  </div>
+</div>
+{% endblock %}

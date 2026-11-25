@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Page not found{% endblock %}
+{% block content %}
+<div class="container py-5 text-center">
+  <h1 class="display-4">404</h1>
+  <p class="lead text-muted">We could not find the page you were looking for.</p>
+  <a class="btn btn-primary" href="{% url 'jobs:list' %}">Browse jobs</a>
+</div>
+{% endblock %}

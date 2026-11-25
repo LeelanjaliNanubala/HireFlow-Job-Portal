@@ -1,0 +1,7 @@
+# HireFlow dependencies (install with: pip install -r requirements.txt)
+# Version ranges are used because exact patch versions must be confirmed on YOUR machine.
+# After a successful install, run `pip freeze > requirements.lock.txt` to record the exact versions.
+Django>=6.1,<6.2
+djangorestframework>=3.16,<4.0
+mysqlclient>=2.2
+python-dotenv>=1.0

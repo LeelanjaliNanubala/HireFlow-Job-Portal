@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load hf_extras %}
+{% block title %}Applicants{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <a class="small text-decoration-none" href="{% url 'jobs:manage' %}">&larr; My jobs</a>
+  <div class="hf-page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div><h1>Applicants</h1><p class="text-muted mb-0">{{ job.title }}</p></div>
+    <form method="get" class="d-flex gap-2">
+      <select class="form-select" name="status" aria-label="Filter by status"><option value="">All statuses</option>
+        {% for value, label in statuses %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+      <button class="btn btn-outline-primary" type="submit" data-no-loading>Filter</button>
+    </form>
+  </div>
+  <div class="hf-card"><div class="table-responsive">
+    <table class="table hf-table table-hover">
+      <thead><tr><th>Candidate</th><th>Headline</th><th>Applied</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      {% for app in page_obj %}
+        <tr><td class="fw-semibold">{{ app.candidate.user.full_name }}<div class="hf-meta">{{ app.candidate.user.email }}</div></td>
+          <td>{{ app.candidate.headline|default:"-" }}</td><td>{{ app.applied_at|date:"d M Y" }}</td>
+          <td><span class="badge hf-badge {{ app.status|status_class }}">{{ app.get_status_display }}</span></td>
+          <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{% url 'applications:review' app.pk %}">Review</a></td></tr>
+      {% empty %}<tr><td colspan="5">{% include "partials/empty_state.html" with icon="people" title="No applicants" text="Nobody matches this filter yet." %}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+  {% include "partials/pagination.html" %}
+</div>
+{% endblock %}

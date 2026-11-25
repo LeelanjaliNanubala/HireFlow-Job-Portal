@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load hf_extras %}
+{% block title %}Recruiter dashboard{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="hf-page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div><h1>{{ company.name }}</h1><p class="text-muted mb-0">Recruitment overview
+      <span class="badge hf-badge {{ company.verification_status|status_class }}">{{ company.get_verification_status_display }}</span></p></div>
+    <a class="btn btn-primary" href="{% url 'jobs:create' %}"><i class="bi bi-plus-lg"></i> Post a job</a>
+  </div>
+  {% if not company.is_verified %}
+    <div class="alert alert-warning">Your company is <strong>{{ company.get_verification_status_display|lower }}</strong>. You can create drafts now; publishing unlocks after an administrator verifies the company.</div>
+  {% endif %}
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-4">{% include "partials/stat_card.html" with icon="briefcase" value=stats.total_jobs label="Total jobs" %}</div>
+    <div class="col-sm-6 col-xl-4">{% include "partials/stat_card.html" with icon="broadcast" value=stats.active_jobs label="Active jobs" %}</div>
+    <div class="col-sm-6 col-xl-4">{% include "partials/stat_card.html" with icon="people" value=stats.total_applicants label="Total applicants" %}</div>
+    <div class="col-sm-6 col-xl-4">{% include "partials/stat_card.html" with icon="star" value=stats.shortlisted label="Shortlisted" %}</div>
+    <div class="col-sm-6 col-xl-4">{% include "partials/stat_card.html" with icon="calendar-check" value=stats.interviews_scheduled label="Interviews scheduled" %}</div>
+    <div class="col-sm-6 col-xl-4">{% include "partials/stat_card.html" with icon="trophy" value=stats.selected label="Selected" %}</div>
+  </div>
+  <div class="row g-4">
+    <div class="col-lg-4"><div class="hf-card h-100"><div class="hf-card-header">Applicants by status</div><div class="hf-card-body">
+      <div style="height:260px"><canvas data-chart-source="status-data" data-chart-type="doughnut"></canvas></div>{{ status_chart|json_script:"status-data" }}</div></div></div>
+    <div class="col-lg-4"><div class="hf-card h-100"><div class="hf-card-header">Applicants per job</div><div class="hf-card-body">
+      <div style="height:260px"><canvas data-chart-source="perjob-data" data-chart-type="bar"></canvas></div>{{ per_job_chart|json_script:"perjob-data" }}</div></div></div>
+    <div class="col-lg-4"><div class="hf-card h-100"><div class="hf-card-header">Applications, last 14 days</div><div class="hf-card-body">
+      <div style="height:260px"><canvas data-chart-source="daily-data" data-chart-type="line"></canvas></div>{{ daily_chart|json_script:"daily-data" }}</div></div></div>
+  </div>
+  <div class="hf-card mt-4"><div class="hf-card-header">Latest applicants</div><div class="table-responsive">
+    <table class="table hf-table table-hover"><tbody>
+      {% for app in recent_applications %}
+        <tr><td class="fw-semibold">{{ app.candidate.user.full_name }}</td><td>{{ app.job.title }}</td><td>{{ app.applied_at|date:"d M Y" }}</td>
+          <td><span class="badge hf-badge {{ app.status|status_class }}">{{ app.get_status_display }}</span></td>
+          <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{% url 'applications:review' app.pk %}">Review</a></td></tr>
+      {% empty %}<tr><td>{% include "partials/empty_state.html" with icon="people" title="No applicants yet" text="Publish a job to start receiving applications." %}</td></tr>{% endfor %}
+    </tbody></table></div></div>
+</div>
+{% endblock %}
+{% block extra_js %}{% include "partials/chart_scripts.html" %}{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load hf_extras %}
+{% block title %}My interviews{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="hf-page-header"><h1>My interviews</h1></div>
+  <h2 class="h5 mb-3">Upcoming</h2>
+  <div class="row g-3 mb-4">
+    {% for interview in upcoming %}
+      <div class="col-md-6"><div class="hf-card"><div class="hf-card-body">
+        <div class="fw-semibold">{{ interview.application.job.title }} - {{ interview.application.job.company.name }}</div>
+        <div class="text-primary fw-semibold">{{ interview.scheduled_at|date:"D, d M Y, H:i" }} ({{ interview.duration_minutes }} min)</div>
+        <div class="hf-meta">Round {{ interview.round_number }} &middot; {{ interview.get_mode_display }}{% if interview.interviewer_name %} &middot; with {{ interview.interviewer_name }}{% endif %}</div>
+        {% if interview.meeting_details %}<div class="small mt-1">{{ interview.meeting_details }}</div>{% endif %}
+        <a class="small" href="{% url 'applications:detail' interview.application.pk %}">View application</a>
+      </div></div></div>
+    {% empty %}
+      <div class="col-12 hf-card">{% include "partials/empty_state.html" with icon="calendar" title="No upcoming interviews" text="When a recruiter schedules an interview it appears here." %}</div>
+    {% endfor %}
+  </div>
+  {% if past %}
+  <h2 class="h5 mb-3">Past and cancelled</h2>
+  <div class="hf-card"><ul class="list-group list-group-flush">
+    {% for interview in past %}
+      <li class="list-group-item d-flex justify-content-between"><span>{{ interview.application.job.title }} &middot; {{ interview.scheduled_at|date:"d M Y, H:i" }}</span>
+        <span class="badge {{ interview.status|status_class }}">{{ interview.get_status_display }}</span></li>
+    {% endfor %}
+  </ul></div>
+  {% endif %}
+</div>
+{% endblock %}

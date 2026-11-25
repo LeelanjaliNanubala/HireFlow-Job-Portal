@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Audit log{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="hf-page-header"><h1>Audit log</h1><p class="text-muted mb-0">Important administrative actions are recorded here.</p></div>
+  {% include "admin_dashboard/_nav.html" %}
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-md-6"><input class="form-control" name="q" value="{{ q }}" placeholder="Search action, target or details"></div>
+    <div class="col-md-2 d-grid"><button class="btn btn-primary" type="submit" data-no-loading>Search</button></div>
+  </form>
+  <div class="hf-card"><div class="table-responsive">
+    <table class="table hf-table table-hover">
+      <thead><tr><th>When</th><th>Admin</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+      <tbody>
+      {% for entry in page_obj %}
+        <tr><td class="text-nowrap">{{ entry.created_at|date:"d M Y, H:i" }}</td><td>{{ entry.actor.email|default:"-" }}</td>
+          <td><code>{{ entry.action }}</code></td><td>{{ entry.target }}</td><td>{{ entry.details }}</td></tr>
+      {% empty %}<tr><td colspan="5">{% include "partials/empty_state.html" with icon="journal-text" title="No audit records yet" %}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+  {% include "partials/pagination.html" %}
+</div>
+{% endblock %}

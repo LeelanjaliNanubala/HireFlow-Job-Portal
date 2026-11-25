@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load hf_extras %}
+{% block title %}Review application{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <a class="small text-decoration-none" href="{% url 'applications:applicants' application.job.pk %}">&larr; Applicants for {{ application.job.title }}</a>
+  <div class="hf-page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div><h1>{{ candidate.user.full_name }}</h1>
+      <div class="text-muted">{{ candidate.user.email }}{% if candidate.phone %} &middot; {{ candidate.phone }}{% endif %}{% if candidate.location %} &middot; {{ candidate.location }}{% endif %}</div></div>
+    <span class="badge fs-6 hf-badge {{ application.status|status_class }}">{{ application.get_status_display }}</span>
+  </div>
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="hf-card mb-4"><div class="hf-card-header">Candidate profile</div><div class="hf-card-body">
+        {% if candidate.headline %}<p class="fw-semibold">{{ candidate.headline }}</p>{% endif %}
+        {% if candidate.summary %}<p style="white-space: pre-line">{{ candidate.summary }}</p>{% endif %}
+        {% if candidate.portfolio_url %}<p><a href="{{ candidate.portfolio_url }}" target="_blank" rel="noopener nofollow">{{ candidate.portfolio_url }}</a></p>{% endif %}
+        <h3 class="h6">Skills</h3>
+        <p>{% for cs in candidate_skills %}<span class="hf-chip">{{ cs.skill.name }} &middot; {{ cs.get_proficiency_display }}</span>{% empty %}<span class="hf-meta">None listed</span>{% endfor %}</p>
+        <h3 class="h6">Experience</h3>
+        {% for item in experiences %}<p class="mb-2"><strong>{{ item.job_title }}</strong> at {{ item.company_name }}<br><span class="hf-meta">{{ item.start_date|date:"M Y" }} - {% if item.is_current %}Present{% else %}{{ item.end_date|date:"M Y" }}{% endif %}</span></p>
+        {% empty %}<p class="hf-meta">None listed</p>{% endfor %}
+        <h3 class="h6">Education</h3>
+        {% for item in educations %}<p class="mb-2"><strong>{{ item.degree }}</strong>, {{ item.institution }}<br><span class="hf-meta">{{ item.start_year }} - {{ item.end_year|default:"Present" }}</span></p>
+        {% empty %}<p class="hf-meta">None listed</p>{% endfor %}
+      </div></div>
+      {% if application.cover_letter %}<div class="hf-card mb-4"><div class="hf-card-header">Cover letter</div><div class="hf-card-body" style="white-space: pre-line">{{ application.cover_letter }}</div></div>{% endif %}
+      <div class="hf-card"><div class="hf-card-header">Status history</div><div class="hf-card-body">
+        <ul class="hf-timeline">{% for item in history %}
+          <li><div class="fw-semibold">{% if item.old_status %}{{ item.old_status|status_label }} &rarr; {% endif %}{{ item.new_status|status_label }}</div>
+            <div class="hf-meta">{{ item.changed_at|date:"d M Y, H:i" }}{% if item.changed_by %} &middot; {{ item.changed_by.full_name|default:item.changed_by.email }}{% endif %}</div>
+            {% if item.note %}<div class="small">{{ item.note }}</div>{% endif %}</li>{% endfor %}</ul>
+      </div></div>
+    </div>
+    <div class="col-lg-5">
+      <div class="hf-card mb-4"><div class="hf-card-header">Resume</div><div class="hf-card-body">
+        <a class="btn btn-outline-primary w-100" href="{% url 'candidates:resume_download' application.resume.pk %}"><i class="bi bi-download"></i> Download {{ application.resume.original_name }}</a>
+      </div></div>
+      <div class="hf-card mb-4"><div class="hf-card-header">Update status</div><div class="hf-card-body">
+        {% if has_next_statuses %}
+          <form method="post" action="{% url 'applications:update_status' application.pk %}" data-confirm="Change the status of this application? The candidate will be notified.">
+            {% csrf_token %}{% include "partials/form_fields.html" with form=status_form %}
+            <button type="submit" class="btn btn-primary w-100">Update status</button></form>
+        {% else %}<p class="hf-meta mb-0">No further status changes are available for this application.</p>{% endif %}
+        {% if can_schedule %}<a class="btn btn-outline-primary w-100 mt-2" href="{% url 'interviews:schedule' application.pk %}"><i class="bi bi-calendar-plus"></i> Schedule interview</a>{% endif %}
+      </div></div>
+      <div class="hf-card"><div class="hf-card-header">Interviews</div><ul class="list-group list-group-flush">
+        {% for interview in interviews %}
+          <li class="list-group-item"><div class="fw-semibold">Round {{ interview.round_number }} &middot; {{ interview.scheduled_at|date:"d M Y, H:i" }}
+            <span class="badge {{ interview.status|status_class }}">{{ interview.get_status_display }}</span></div>
+            <div class="hf-meta">{{ interview.get_mode_display }}{% if interview.interviewer_name %} &middot; {{ interview.interviewer_name }}{% endif %}</div>
+            {% if interview.rating %}<div class="small">Rating: {{ interview.rating }}/5</div>{% endif %}
+            {% if interview.feedback %}<div class="small" style="white-space: pre-line">{{ interview.feedback }}</div>{% endif %}
+            <a class="small" href="{% url 'interviews:edit' interview.pk %}">Edit / add feedback</a></li>
+        {% empty %}<li class="list-group-item hf-meta">No interviews yet.</li>{% endfor %}
+      </ul></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

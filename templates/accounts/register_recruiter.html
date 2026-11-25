@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Register as a recruiter{% endblock %}
+{% block content %}
+<div class="container py-5"><div class="hf-auth-card" style="max-width:560px">
+  <div class="hf-card"><div class="hf-card-body p-4">
+    <h1 class="h4 mb-1">Create your recruiter account</h1>
+    <p class="text-muted">Create your company, post jobs and manage applicants.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <button type="submit" class="btn btn-primary w-100" data-loading-text="Creating account...">Create account</button>
+    </form>
+    <div class="mt-3 small text-center">Already registered? <a href="{% url 'accounts:login' %}">Log in</a> &middot; <a href="{% url 'accounts:register_candidate' %}">Looking for a job? Register as a candidate</a></div>
+  </div></div>
+</div></div>
+{% endblock %}

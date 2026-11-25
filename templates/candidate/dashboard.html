@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load hf_extras %}
+{% block title %}My dashboard{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="hf-page-header"><h1>Hello, {{ user.get_short_name }}</h1><p class="text-muted mb-0">Here is where your job search stands.</p></div>
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">{% include "partials/stat_card.html" with icon="send" value=stats.total label="Total applications" %}</div>
+    <div class="col-sm-6 col-xl-3">{% include "partials/stat_card.html" with icon="hourglass-split" value=stats.under_review label="Under review" %}</div>
+    <div class="col-sm-6 col-xl-3">{% include "partials/stat_card.html" with icon="star" value=stats.shortlisted label="Shortlisted" %}</div>
+    <div class="col-sm-6 col-xl-3">{% include "partials/stat_card.html" with icon="calendar-check" value=stats.upcoming_interviews label="Upcoming interviews" %}</div>
+  </div>
+  {% if completeness < 100 %}
+  <div class="alert alert-info d-flex justify-content-between align-items-center">
+    <span>Your profile is {{ completeness }}% complete. A complete profile gets more attention.</span>
+    <a class="btn btn-sm btn-primary" href="{% url 'candidates:profile' %}">Complete profile</a>
+  </div>
+  {% endif %}
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="hf-card h-100"><div class="hf-card-header">Applications by status</div><div class="hf-card-body">
+        <div style="height:260px"><canvas data-chart-source="status-data" data-chart-type="doughnut"></canvas></div>
+        {{ status_chart|json_script:"status-data" }}
+      </div></div>
+    </div>
+    <div class="col-lg-7">
+      <div class="hf-card mb-4"><div class="hf-card-header d-flex justify-content-between">Recent applications <a class="small" href="{% url 'applications:mine' %}">View all</a></div>
+        <div class="table-responsive">
+          <table class="table hf-table table-hover">
+            <tbody>
+            {% for app in recent_applications %}
+              <tr>
+                <td><a class="text-decoration-none fw-semibold" href="{% url 'applications:detail' app.pk %}">{{ app.job.title }}</a><div class="hf-meta">{{ app.job.company.name }}</div></td>
+                <td class="text-end"><span class="badge hf-badge {{ app.status|status_class }}">{{ app.get_status_display }}</span></td>
+              </tr>
+            {% empty %}
+              <tr><td>{% include "partials/empty_state.html" with icon="send" title="No applications yet" text="Find a job you like and apply." %}</td></tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="hf-card"><div class="hf-card-header d-flex justify-content-between">Upcoming interviews <a class="small" href="{% url 'interviews:mine' %}">View all</a></div>
+        <ul class="list-group list-group-flush">
+          {% for interview in upcoming_interviews %}
+            <li class="list-group-item"><strong>{{ interview.application.job.title }}</strong> - {{ interview.application.job.company.name }}
+              <div class="hf-meta">{{ interview.scheduled_at|date:"D, d M Y, H:i" }} &middot; {{ interview.get_mode_display }}</div></li>
+          {% empty %}
+            <li class="list-group-item hf-meta">No interviews scheduled.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}{% include "partials/chart_scripts.html" %}{% endblock %}

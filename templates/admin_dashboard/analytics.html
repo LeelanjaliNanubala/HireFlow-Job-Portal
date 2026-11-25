@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Platform analytics{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="hf-page-header"><h1>Platform analytics</h1></div>
+  {% include "admin_dashboard/_nav.html" %}
+  <div class="row g-4">
+    <div class="col-lg-6"><div class="hf-card h-100"><div class="hf-card-header">Jobs by status</div><div class="hf-card-body">
+      <div style="height:280px"><canvas data-chart-source="jobs-data" data-chart-type="doughnut"></canvas></div>{{ jobs_chart|json_script:"jobs-data" }}</div></div></div>
+    <div class="col-lg-6"><div class="hf-card h-100"><div class="hf-card-header">Jobs by employment type</div><div class="hf-card-body">
+      <div style="height:280px"><canvas data-chart-source="type-data" data-chart-type="bar"></canvas></div>{{ type_chart|json_script:"type-data" }}</div></div></div>
+    <div class="col-lg-6"><div class="hf-card h-100"><div class="hf-card-header">Applications by status</div><div class="hf-card-body">
+      <div style="height:280px"><canvas data-chart-source="status-data" data-chart-type="bar"></canvas></div>{{ status_chart|json_script:"status-data" }}</div></div></div>
+    <div class="col-lg-6"><div class="hf-card h-100"><div class="hf-card-header">Top companies by applications</div>
+      <ul class="list-group list-group-flush">
+        {% for company in top_companies %}<li class="list-group-item d-flex justify-content-between"><span>{{ company.name }}</span><span class="badge bg-primary">{{ company.total }}</span></li>
+        {% empty %}<li class="list-group-item hf-meta">No data yet.</li>{% endfor %}
+      </ul></div></div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}{% include "partials/chart_scripts.html" %}{% endblock %}

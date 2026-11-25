@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load hf_extras %}
+{% block title %}Job moderation{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="hf-page-header"><h1>Job moderation</h1></div>
+  {% include "admin_dashboard/_nav.html" %}
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-md-5"><input class="form-control" name="q" value="{{ q }}" placeholder="Search title or company"></div>
+    <div class="col-md-3"><select class="form-select" name="status"><option value="">All statuses</option>
+      {% for value, label in statuses %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-2 d-grid"><button class="btn btn-primary" type="submit" data-no-loading>Filter</button></div>
+  </form>
+  <div class="hf-card"><div class="table-responsive">
+    <table class="table hf-table table-hover">
+      <thead><tr><th>Job</th><th>Company</th><th>Status</th><th>Applicants</th><th>Moderation</th></tr></thead>
+      <tbody>
+      {% for job in page_obj %}
+        <tr><td><a class="fw-semibold text-decoration-none" href="{% url 'jobs:detail' job.pk %}">{{ job.title }}</a>
+            {% if job.is_featured %}<span class="badge bg-info text-dark">Featured</span>{% endif %}
+            {% if job.is_hidden_by_admin %}<span class="badge bg-danger">Hidden</span>{% endif %}</td>
+         <td>
+          <div class="d-flex align-items-center gap-2">
+            <span>{{ job.company.name }}</span>
+            {% if job.company.is_verified %}
+            <span class="badge bg-success">Verified</span>
+            {% else %}
+            <span class="badge bg-warning text-dark">
+              {{ job.company.get_verification_status_display }}
+            </span>
+            {% endif %}
+          </div>
+        </td>
+          <td><span class="badge hf-badge {{ job.status|status_class }}">{{ job.get_status_display }}</span></td>
+          <td>{{ job.applicant_count }}</td>
+          <td>
+            <div class="d-flex gap-1 flex-wrap">
+            {% if job.is_hidden_by_admin %}
+              <form method="post" action="{% url 'analytics:admin_job_moderate' job.pk %}">{% csrf_token %}<input type="hidden" name="action" value="unhide"><input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-sm btn-outline-success" type="submit" data-no-loading>Unhide</button></form>
+            {% else %}
+              <form method="post" action="{% url 'analytics:admin_job_moderate' job.pk %}" class="d-flex gap-1">{% csrf_token %}<input type="hidden" name="action" value="hide"><input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <input class="form-control form-control-sm" name="note" placeholder="Reason" maxlength="200" required style="width:130px"><button class="btn btn-sm btn-outline-danger" type="submit" data-no-loading>Hide</button></form>
+            {% endif %}
+            <form method="post" action="{% url 'analytics:admin_job_moderate' job.pk %}">{% csrf_token %}<input type="hidden" name="action" value="{% if job.is_featured %}unfeature{% else %}feature{% endif %}"><input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-sm btn-outline-primary" type="submit" data-no-loading>{% if job.is_featured %}Unfeature{% else %}Feature{% endif %}</button></form>
+            </div></td></tr>
+      {% empty %}<tr><td colspan="5">{% include "partials/empty_state.html" with icon="briefcase" title="No jobs found" %}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+  {% include "partials/pagination.html" %}
+</div>
+{% endblock %}

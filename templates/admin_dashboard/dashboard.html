@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="hf-page-header"><h1>Admin dashboard</h1></div>
+  {% include "admin_dashboard/_nav.html" %}
+  {% if stats.pending_companies %}<div class="alert alert-warning">{{ stats.pending_companies }} company verification{{ stats.pending_companies|pluralize }} waiting. <a href="{% url 'analytics:admin_companies' %}?status=pending">Review now</a></div>{% endif %}
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">{% include "partials/stat_card.html" with icon="people" value=stats.total_users label="Total users" %}</div>
+    <div class="col-sm-6 col-xl-3">{% include "partials/stat_card.html" with icon="person" value=stats.total_candidates label="Candidates" %}</div>
+    <div class="col-sm-6 col-xl-3">{% include "partials/stat_card.html" with icon="person-badge" value=stats.total_recruiters label="Recruiters" %}</div>
+    <div class="col-sm-6 col-xl-3">{% include "partials/stat_card.html" with icon="building" value=stats.total_companies label="Companies" %}</div>
+    <div class="col-sm-6 col-xl-4">{% include "partials/stat_card.html" with icon="briefcase" value=stats.total_jobs label="Jobs" %}</div>
+    <div class="col-sm-6 col-xl-4">{% include "partials/stat_card.html" with icon="send" value=stats.total_applications label="Applications" %}</div>
+    <div class="col-sm-6 col-xl-4">{% include "partials/stat_card.html" with icon="calendar-check" value=stats.total_interviews label="Interviews" %}</div>
+  </div>
+  <div class="row g-4">
+    <div class="col-lg-4"><div class="hf-card h-100"><div class="hf-card-header">Users by role</div><div class="hf-card-body">
+      <div style="height:260px"><canvas data-chart-source="users-data" data-chart-type="doughnut"></canvas></div>{{ users_chart|json_script:"users-data" }}</div></div></div>
+    <div class="col-lg-4"><div class="hf-card h-100"><div class="hf-card-header">Applications by status</div><div class="hf-card-body">
+      <div style="height:260px"><canvas data-chart-source="status-data" data-chart-type="bar"></canvas></div>{{ status_chart|json_script:"status-data" }}</div></div></div>
+    <div class="col-lg-4"><div class="hf-card h-100"><div class="hf-card-header">Applications, last 14 days</div><div class="hf-card-body">
+      <div style="height:260px"><canvas data-chart-source="daily-data" data-chart-type="line"></canvas></div>{{ daily_chart|json_script:"daily-data" }}</div></div></div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}{% include "partials/chart_scripts.html" %}{% endblock %}
